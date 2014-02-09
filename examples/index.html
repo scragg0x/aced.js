@@ -11,25 +11,34 @@
     <script type="text/javascript" src="../vendor/highlightjs/highlight.pack.js"></script>
     <script type="text/javascript" src="../src/aced.js"></script>
     <script>
+        // Init highlight JS
+        hljs.initHighlightingOnLoad();
+
         var data = {
-            e2: "\u003c?php\r\n\r\necho \"Regular Ace editor with php mode\";\r\n    \r\n/*\r\nvar ex2 = Aced({\r\n    editor: \u0027e2\u0027,\r\n    theme: \u0027github\u0027,\r\n    mode: \u0027php\u0027\r\n});\r\n\r\n\u003cdiv id=\"e2\" style=\"height:200px;\"\u003e\u003c/div\u003e\r\n*/"
+            e1: "Author: Matthew Scragg\r\n\r\n#### Markdown\r\n\r\n- Handlebars\r\n- HighlightJs\r\n- Live Preview\r\n- Auto save to local storage\r\n\r\n```javascript\r\nvar ex1 = Aced({\r\n   editor: \u0027e1\u0027,\r\n   theme: \u0027idle_fingers\u0027,\r\n   mode: \u0027markdown\u0027,\r\n   preview: \u0027p1\u0027\r\n});\r\n```\r\n\r\n\u003cdiv id=\"e1\" style=\"min-height:200px;\"\u003e\u003c/div\u003e\r\n\u003cdiv id=\"p1\"\u003e\u003c/div\u003e",
+            e2: "\u003c?php\r\n\r\necho \"Regular Ace editor with php mode\";\r\n    \r\n/*\r\nvar ex2 = Aced({\r\n    editor: \u0027e2\u0027,\r\n    theme: \u0027github\u0027,\r\n    mode: \u0027php\u0027\r\n});\r\n\r\n\u003cdiv id=\"e2\" style=\"min-height:200px;\"\u003e\u003c/div\u003e\r\n*/"
         };
 
         $(function(){
-            var ex1 = Aced({
+            var ex1 = new Aced({
                 editor: 'e1',
                 theme: 'idle_fingers',
                 mode: 'markdown',
                 preview: 'p1'
             });
             ex1.editor.focus();
+            if (!ex1.editor.getSession().getValue()) {
+                ex1.editor.getSession().setValue(data.e1);
+            }
 
-            var ex2 = Aced({
+            var ex2 = new Aced({
                 editor: 'e2',
                 theme: 'github',
                 mode: 'php'
             });
-            ex2.editor.getSession().setValue(data.e2);
+            if (!ex2.editor.getSession().getValue()) {
+                ex2.editor.getSession().setValue(data.e2);
+            }
         })
     </script>
 </head>
@@ -43,10 +52,20 @@
 </div>
 
 <div class="container">
-    <div id="e1" style="height:200px;"></div>
-    <div id="p1"></div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div id="e1" style="min-height:350px;"></div>
+        </div>
+        <div class="col-sm-6">
+            <div id="p1"></div>
+        </div>
+    </div>
 
-    <div id="e2" style="height:200px;"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="e2" style="min-height:300px;"></div>
+        </div>
+    </div>
 </div>
 
 </body>

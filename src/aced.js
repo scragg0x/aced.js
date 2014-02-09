@@ -15,6 +15,10 @@ function Aced(settings) {
         keymaster: false
     };
 
+    profile = {
+        theme: 'idle_fingers'
+    };
+
     function toJquery(o) {
         if (typeof o == 'string') {
             return $("#" + o);
@@ -34,12 +38,12 @@ function Aced(settings) {
         return storage;
     }
 
-    function getUserProfile() {
+    function getProfile() {
         if (!storage) return;
         var p;
 
         try {
-            p = JSON.parse(storage.profile);
+            p = JSON.parse(storage.aced_profile);
             // Need to merge in any undefined/new properties from last release
             // Meaning, if we add new features they may not have them in profile
             p = $.extend(true, profile, p);
@@ -47,16 +51,30 @@ function Aced(settings) {
             p = profile
         }
 
-        if (p.id != id) {
-            updateUserProfile({ id: id, content: "" });
-        }
         profile = p;
     }
 
-    function updateUserProfile(obj) {
+    function updateProfile(obj) {
         if (!storage) return;
-        storage.clear();
-        storage.profile = JSON.stringify($.extend(true, profile, obj));
+        storage.aced_profile = JSON.stringify($.extend(null, profile, obj));
+    }
+
+    function getEditorStorage() {
+        if (!storage) return "";
+        try {
+            return JSON.parse(storage['aced_'+id]);
+        } catch (e) {
+            return "";
+        }
+    }
+
+    function updateEditorStorage(content) {
+        storage['aced_'+id] = JSON.stringify(content);
+    }
+
+    function initEditorStorage() {
+        if ('aced_'+id in storage) return;
+        storage['aced_'+id] = '';
     }
 
     // Convert markdown to HTML
@@ -124,10 +142,11 @@ function Aced(settings) {
     }
 
     function initEditor() {
+        initEditorStorage();
         editor = ace.edit(id);
         editor.setTheme('ace/theme/' + options.theme);
         editor.getSession().setMode('ace/mode/' + options.mode);
-        editor.getSession().setValue(profile.content || editor.getSession().getValue());
+        editor.getSession().setValue(getEditorStorage() || editor.getSession().getValue());
         editor.getSession().setUseWrapMode(true);
         editor.setShowPrintMargin(false);
 
@@ -142,10 +161,10 @@ function Aced(settings) {
     }
 
     function save(isManual) {
-        updateUserProfile({content: editor.getSession().getValue()});
+        updateEditorStorage(editor.getSession().getValue());
 
         if (isManual) {
-            updateUserProfile({ content: "" });
+            delete storage['aced_'+id];
 
             var data = {
                 //name: $pagename.val(),
@@ -260,16 +279,12 @@ function Aced(settings) {
             id = element.attr('id')
         }
 
-        profile = {
-            content: ''
-        }
-
         storage = hasLocalStorage();
     }
 
     function init() {
         initProps();
-        getUserProfile();
+        getProfile();
         initEditor();
         initSyncPreview();
         autoSave();
