@@ -17,14 +17,17 @@ function escapeHtml(s) {
     return s;
 }
 
-/**
- * Main function for converting markdown to HTML.
- *
- * @param {String} content
- * @param {Object} options
- * @return {String}
- * @api public
- */
+function gsub(str, re, fn, /*optional*/newstr) {
+    newstr = newstr || '';
+    var match = re.exec(str);
+    if (match) {
+        newstr += str.slice(0, match.index);
+        newstr += fn.apply(null, match);
+        remaining = str.slice(match.index + match[0].length);
+        return gsub(remaining, re, fn, newstr);
+    }
+    return newstr + str;
+}
 
 var WMD = {};
 
@@ -40,18 +43,6 @@ WMD.convert = function(content, options) {
     return doc;
 };
 
-
-function gsub(str, re, fn, /*optional*/newstr) {
-    newstr = newstr || '';
-    var match = re.exec(str);
-    if (match) {
-        newstr += str.slice(0, match.index);
-        newstr += fn.apply(null, match);
-        remaining = str.slice(match.index + match[0].length);
-        return gsub(remaining, re, fn, newstr);
-    }
-    return newstr + str;
-};
 
 WMD.showdown = new Showdown.converter({extensions: ['table']});
 WMD.processor = WMD.showdown.makeHtml;

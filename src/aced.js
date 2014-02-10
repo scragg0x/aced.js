@@ -12,11 +12,8 @@ function Aced(settings) {
         autoSave: true,
         autoSaveInterval: 3000,
         syncPreview: true,
-        keymaster: false
-    };
-
-    profile = {
-        theme: 'idle_fingers'
+        keyMaster: false,
+        submit: function(data){ console.log(data); }
     };
 
     function toJquery(o) {
@@ -77,33 +74,38 @@ function Aced(settings) {
         storage['aced_'+id] = '';
     }
 
-    // Convert markdown to HTML
-    function render(md) {
+    function render(content) {
+        if (options.mode == 'markdown') {
+            var doc = WMD.convert(content);
+            var html = doc.html;
 
-        var doc = WMD.convert(md);
-        var html = doc.html;
-
-        if (options.sanitize) {
-            html = html_sanitize(html,
-                function(url) {
-                    if(/^https?:\/\//.test(url)) {
-                        return url
+            if (options.sanitize) {
+                html = html_sanitize(html,
+                    function(url) {
+                        if(/^https?:\/\//.test(url)) {
+                            return url
+                        }
+                    }, function(id){
+                        return id;
                     }
-                }, function(id){
-                    return id;
-                }
-            );
-        }
-
-        if (doc.metadata) {
-            try {
-                var template = Handlebars.compile(html);
-                return template(doc.metadata);
-            } catch (e) {
-                return html;
+                );
             }
+
+            if (doc.metadata) {
+                try {
+                    var template = Handlebars.compile(html);
+                    return template(doc.metadata);
+                } catch (e) {
+                    return html;
+                }
+            }
+            return html;
+        } else if (options.mode == 'html') {
+            return content;
+        } else {
+            // Nothing to do for other modes
+            return '';
         }
-        return html;
     }
 
     function resetProfile() {
@@ -124,7 +126,7 @@ function Aced(settings) {
     function bindKeyboard() {
         // CMD+s TO SAVE DOC
         key('command+s, ctrl+s', function (e) {
-            save(true);
+            submit();
             e.preventDefault();
         });
 
@@ -135,7 +137,7 @@ function Aced(settings) {
                 win: "Ctrl-S"
             },
             exec: function () {
-                save(true);
+                submit();
             }
         };
         editor.commands.addCommand(saveCommand);
@@ -146,11 +148,11 @@ function Aced(settings) {
         editor = ace.edit(id);
         editor.setTheme('ace/theme/' + options.theme);
         editor.getSession().setMode('ace/mode/' + options.mode);
-        editor.getSession().setValue(getEditorStorage() || editor.getSession().getValue());
+        editor.getSession().setValue(getEditorStorage() || val());
         editor.getSession().setUseWrapMode(true);
         editor.setShowPrintMargin(false);
 
-        if (options.keymaster) {
+        if (options.keyMaster) {
             bindKeyboard();
         }
 
@@ -160,22 +162,22 @@ function Aced(settings) {
         }
     }
 
-    function save(isManual) {
-        updateEditorStorage(editor.getSession().getValue());
-
-        if (isManual) {
-            delete storage['aced_'+id];
-
-            var data = {
-                //name: $pagename.val(),
-                //message: $("#page-message").val(),
-                content: editor.getSession().getValue()
-            };
-
-            $.post(window.location, data, function () {
-                location.href = url_prefix + '/' + data['name'];
-            });
+    function val(val) {
+        // Alias func
+        if (val) {
+            editor.getSession().setValue(val);
         }
+
+        return editor.getSession().getValue();
+    }
+
+    function save() {
+        updateEditorStorage(val());
+    }
+
+    function submit() {
+        delete storage['aced_'+id];
+        options.submit(val());
     }
 
     function autoSave() {
@@ -190,11 +192,10 @@ function Aced(settings) {
                 clearInterval(autoInterval)
             }
         }
-
     }
 
     function previewMd() {
-        var unmd = editor.getSession().getValue();
+        var unmd = val();
         var md = render(unmd);
 
         if (preview){
@@ -262,14 +263,24 @@ function Aced(settings) {
     }
 
     function initProps() {
-        $.extend(options, settings);
-
-        if (options.preview) {
-            preview = toJquery(options.preview);
+        if (typeof settings == 'string') {
+            settings = { editor: settings };
         }
+
+        $.extend(options, settings);
 
         if (options.editor) {
             element = toJquery(options.editor);
+        }
+
+        $.each(options, function(k, v){
+            if (element.data(k)) {
+                options[k] = element.data(k);
+            }
+        });
+
+        if (options.preview) {
+            preview = toJquery(options.preview);
         }
 
         if (!element.attr('id')) {
@@ -281,6 +292,10 @@ function Aced(settings) {
         }
 
         storage = hasLocalStorage();
+
+        profile = {
+            theme: 'idle_fingers'
+        };
     }
 
     function init() {
@@ -294,6 +309,8 @@ function Aced(settings) {
     init();
 
     return {
-        editor: editor
+        editor: editor,
+        submit: submit,
+        val: val
     };
 }

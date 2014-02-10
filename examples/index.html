@@ -23,15 +23,20 @@
         $(function(){
             var ex1 = new Aced({
                 editor: 'e1',
-                theme: 'idle_fingers',
-                mode: 'markdown',
-                preview: 'p1'
+                submit: function(data) {
+                    console.log(data);
+                }
             });
+
             ex1.editor.focus();
 
-            if (!ex1.editor.getSession().getValue()) {
-                ex1.editor.getSession().setValue(data.e1);
+            if (!ex1.val()) {
+                ex1.val(data.e1);
             }
+
+            $("#ex1-btn").click(function(){
+                ex1.submit();
+            });
 
             var ex2 = new Aced({
                 editor: 'e2',
@@ -39,8 +44,8 @@
                 mode: 'php'
             });
 
-            if (!ex2.editor.getSession().getValue()) {
-                ex2.editor.getSession().setValue(data.e2);
+            if (!ex2.val()) {
+                ex2.val(data.e2);
             }
         })
     </script>
@@ -57,12 +62,19 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-6">
-            <div id="e1" style="min-height:350px;"></div>
+            <div id="e1" style="min-height:350px;" data-mode="markdown" data-theme="idle_fingers" data-preview="p1"></div>
         </div>
         <div class="col-sm-6">
             <div id="p1"></div>
         </div>
     </div>
+
+    <p>
+        <a href="#" id="ex1-btn" class="btn btn-primary">Submit</a>
+    </p>
+
+
+    <p></p>
 
     <div class="row">
         <div class="col-md-12">
