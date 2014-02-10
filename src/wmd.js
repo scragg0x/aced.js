@@ -75,6 +75,11 @@ WMD.preprocessors = {
         return doc;
     },
 
+    cleanNewlines: function(doc) {
+        doc.markdown = doc.markdown.replace(/\r\n/g, '\n');
+        return doc;
+    },
+
     metadata: function (doc) {
         var key;
         var lines = doc.markdown.split('\n');
@@ -146,6 +151,7 @@ WMD.postprocessors = {};
 WMD.readOptions = function (options) {
     var obj = {
         preprocessors: [
+            WMD.preprocessors.cleanNewlines,
             WMD.preprocessors.metadata,
             WMD.preprocessors.underscores,
             WMD.preprocessors.fencedCodeBlocksHighlightJS

@@ -1,6 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../vendor/highlightjs/styles/github.css">
     <script type="text/javascript" src="../vendor/jquery/jquery.js"></script>
     <script type="text/javascript" src="../vendor/ace-builds/src-noconflict/ace.js"></script>
     <script type="text/javascript" src="../vendor/handlebars/handlebars.js"></script>
@@ -15,7 +16,7 @@
         hljs.initHighlightingOnLoad();
 
         var data = {
-            e1: "Author: Matthew Scragg\r\n\r\n#### Markdown\r\n\r\n- Handlebars\r\n- HighlightJs\r\n- Live Preview\r\n- Auto save to local storage\r\n\r\n```javascript\r\nvar ex1 = Aced({\r\n   editor: \u0027e1\u0027,\r\n   theme: \u0027idle_fingers\u0027,\r\n   mode: \u0027markdown\u0027,\r\n   preview: \u0027p1\u0027\r\n});\r\n```\r\n\r\n\u003cdiv id=\"e1\" style=\"min-height:200px;\"\u003e\u003c/div\u003e\r\n\u003cdiv id=\"p1\"\u003e\u003c/div\u003e",
+            e1: "Author: Matthew Scragg\r\n\r\n#### Markdown\r\n\r\n- Handlebars\r\n- HighlightJs\r\n- Live Preview\r\n- Auto save to local storage\r\n\r\n```javascript\r\nvar ex1 = Aced({\r\n   editor: \u0027e1\u0027,\r\n   theme: \u0027idle_fingers\u0027,\r\n   mode: \u0027markdown\u0027,\r\n   preview: \u0027p1\u0027\r\n});\r\n\u003cdiv id=\"e1\" style=\"min-height:200px;\"\u003e\u003c/div\u003e\r\n\u003cdiv id=\"p1\"\u003e\u003c/div\u003e\r\n```\r\n\r\nAuthor: {{ Author }}",
             e2: "\u003c?php\r\n\r\necho \"Regular Ace editor with php mode\";\r\n    \r\n/*\r\nvar ex2 = Aced({\r\n    editor: \u0027e2\u0027,\r\n    theme: \u0027github\u0027,\r\n    mode: \u0027php\u0027\r\n});\r\n\r\n\u003cdiv id=\"e2\" style=\"min-height:200px;\"\u003e\u003c/div\u003e\r\n*/"
         };
 
@@ -27,6 +28,7 @@
                 preview: 'p1'
             });
             ex1.editor.focus();
+
             if (!ex1.editor.getSession().getValue()) {
                 ex1.editor.getSession().setValue(data.e1);
             }
@@ -36,6 +38,7 @@
                 theme: 'github',
                 mode: 'php'
             });
+
             if (!ex2.editor.getSession().getValue()) {
                 ex2.editor.getSession().setValue(data.e2);
             }

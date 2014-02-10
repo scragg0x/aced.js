@@ -200,6 +200,7 @@ function Aced(settings) {
         if (preview){
             preview.html('').html(md);
         }
+        $('pre code', preview).each(function(i, e) {hljs.highlightBlock(e)});
     }
 
     function getScrollHeight($prevFrame) {
