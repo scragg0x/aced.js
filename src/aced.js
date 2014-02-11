@@ -13,7 +13,7 @@ function Aced(settings) {
         autoSaveInterval: 5000,
         syncPreview: true,
         keyMaster: false,
-        submit: function(data){ console.log(data); },
+        submit: function(data){ alert(data); },
         showButtonBar: true
     };
 
@@ -325,7 +325,7 @@ function Aced(settings) {
             var $btnBar = $('<div class="aced-button-bar aced-button-bar-top">' + buildThemeSelect().html() + ' <button type="button" class="btn btn-primary btn-xs aced-save">Save</button></div>')
             $editor.before($btnBar);
 
-            $editor.find(".aced-save").click(function(){
+            $(".aced-save", $btnBar).click(function(){
                 submit();
             });
 
