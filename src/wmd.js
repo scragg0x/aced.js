@@ -23,7 +23,7 @@ function gsub(str, re, fn, /*optional*/newstr) {
     if (match) {
         newstr += str.slice(0, match.index);
         newstr += fn.apply(null, match);
-        remaining = str.slice(match.index + match[0].length);
+        var remaining = str.slice(match.index + match[0].length);
         return gsub(remaining, re, fn, newstr);
     }
     return newstr + str;

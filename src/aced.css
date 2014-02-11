@@ -1,0 +1,19 @@
+.aced-button-bar-top {
+    display: none;
+    position: absolute;
+    width: 100%;
+    z-index: 5;
+    text-align: right;
+    padding:5px 20px;
+    top:0;
+}
+
+.aced-button-bar-bottom {
+    display: none;
+    position: absolute;
+    width: 100%;
+    z-index: 5;
+    text-align: right;
+    padding:5px 20px;
+    bottom:0;
+}

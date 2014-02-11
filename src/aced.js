@@ -1,5 +1,5 @@
 function Aced(settings) {
-    var id, options, editor, element, preview, profile, autoInterval, storage;
+    var id, options, editor, element, preview, profile, autoInterval, storage, themes;
 
     settings = settings || {};
 
@@ -13,8 +13,46 @@ function Aced(settings) {
         autoSaveInterval: 3000,
         syncPreview: true,
         keyMaster: false,
-        submit: function(data){ console.log(data); }
+        submit: function(data){ console.log(data); },
+        showButtonBar: true
     };
+
+    themes = {
+        chrome: "Chrome",
+        clouds: "Clouds",
+        clouds_midnight: "Clouds Midnight",
+        cobalt: "Cobalt",
+        crimson_editor: "Crimson Editor",
+        dawn: "Dawn",
+        dreamweaver: "Dreamweaver",
+        eclipse: "Eclipse",
+        idle_fingers: "idleFingers",
+        kr_theme: "krTheme",
+        merbivore: "Merbivore",
+        merbivore_soft: "Merbivore Soft",
+        mono_industrial: "Mono Industrial",
+        monokai: "Monokai",
+        pastel_on_dark: "Pastel on Dark",
+        solarized_dark: "Solarized Dark",
+        solarized_light: "Solarized Light",
+        textmate: "TextMate",
+        tomorrow: "Tomorrow",
+        tomorrow_night: "Tomorrow Night",
+        tomorrow_night_blue: "Tomorrow Night Blue",
+        tomorrow_night_bright: "Tomorrow Night Bright",
+        tomorrow_night_eighties: "Tomorrow Night 80s",
+        twilight: "Twilight",
+        vibrant_ink: "Vibrant Ink"
+    };
+
+    function buildThemeSelect() {
+        var $button = $('<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Theme</button>');
+        var $sel = $("<ul class='aced-theme-sel dropdown-menu'></ul>");
+        $.each(themes, function(k, v) {
+           $sel.append("<li><a tabindex='-1' href='#' data-value='" + k + "'>" + v + "</li>");
+        });
+        return $("<div />").append($button).append($sel);
+    }
 
     function toJquery(o) {
         if (typeof o == 'string') {
@@ -143,25 +181,6 @@ function Aced(settings) {
         editor.commands.addCommand(saveCommand);
     }
 
-    function initEditor() {
-        initEditorStorage();
-        editor = ace.edit(id);
-        editor.setTheme('ace/theme/' + options.theme);
-        editor.getSession().setMode('ace/mode/' + options.mode);
-        editor.getSession().setValue(getEditorStorage() || val());
-        editor.getSession().setUseWrapMode(true);
-        editor.setShowPrintMargin(false);
-
-        if (options.keyMaster) {
-            bindKeyboard();
-        }
-
-        if (preview) {
-            bindPreview();
-            previewMd();
-        }
-    }
-
     function val(val) {
         // Alias func
         if (val) {
@@ -238,21 +257,6 @@ function Aced(settings) {
         if (!preview || !options.syncPreview) return;
 
         window.onload = function () {
-            // TODO FIX THIS
-            var $loading = $('#loading');
-
-            if ($.support.transition) {
-                $loading
-                    .bind($.support.transitionEnd, function () {
-                        $('#main').removeClass('bye');
-                        $loading.remove();
-                    })
-                    .addClass('fade_slow');
-            } else {
-                $('#main').removeClass('bye');
-                $loading.remove();
-            }
-
             /**
              * Bind synchronization of preview div to editor scroll and change
              * of editor cursor position.
@@ -296,6 +300,38 @@ function Aced(settings) {
         profile = {
             theme: 'idle_fingers'
         };
+    }
+
+    function initEditor() {
+        initEditorStorage();
+        editor = ace.edit(id);
+        editor.setTheme('ace/theme/' + options.theme);
+        editor.getSession().setMode('ace/mode/' + options.mode);
+        editor.getSession().setValue(getEditorStorage() || val());
+        editor.getSession().setUseWrapMode(true);
+        editor.setShowPrintMargin(false);
+
+        var $editor = toJquery(id);
+        $editor.prepend('<div class="aced-button-bar aced-button-bar-top">' + buildThemeSelect().html() + '</div>');
+        $editor.prepend('<div class="aced-button-bar aced-button-bar-bottom"><div class="btn btn-primary btn-xs aced-save">Save</div> </div>')
+        $editor.find(".aced-save").click(function(){
+           submit();
+        });
+
+        if (options.showButtonBar) {
+            var $bar = $editor.find(".aced-button-bar");
+            $bar.show();
+            $editor.hover(function(){ $bar.show(); }, function() { $bar.hide(); });
+        }
+
+        if (options.keyMaster) {
+            bindKeyboard();
+        }
+
+        if (preview) {
+            bindPreview();
+            previewMd();
+        }
     }
 
     function init() {
