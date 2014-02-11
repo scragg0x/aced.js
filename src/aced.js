@@ -10,7 +10,7 @@ function Aced(settings) {
         theme: 'idle_fingers',
         mode: 'markdown',
         autoSave: true,
-        autoSaveInterval: 3000,
+        autoSaveInterval: 5000,
         syncPreview: true,
         keyMaster: false,
         submit: function(data){ console.log(data); },
@@ -45,13 +45,16 @@ function Aced(settings) {
         vibrant_ink: "Vibrant Ink"
     };
 
+    function editorId(){
+        return "aced_" + id;
+    }
     function buildThemeSelect() {
-        var $button = $('<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Theme</button>');
-        var $sel = $("<ul class='aced-theme-sel dropdown-menu'></ul>");
+        var $sel = $("<select class='aced-theme-sel' data-placeholder='Theme'></select>");
+        $sel.append('<option></option>');
         $.each(themes, function(k, v) {
-           $sel.append("<li><a tabindex='-1' href='#' data-value='" + k + "'>" + v + "</li>");
+           $sel.append("<option value='" + k + "'>" + v + "</option>");
         });
-        return $("<div />").append($button).append($sel);
+        return $("<div/>").html($sel);
     }
 
     function toJquery(o) {
@@ -73,9 +76,13 @@ function Aced(settings) {
         return storage;
     }
 
-    function getProfile() {
+    function initProfile() {
+        storage = hasLocalStorage();
+
         if (!storage) return;
+
         var p;
+        profile = {theme:''};
 
         try {
             p = JSON.parse(storage.aced_profile);
@@ -85,31 +92,31 @@ function Aced(settings) {
         } catch (e) {
             p = profile
         }
-
         profile = p;
     }
 
     function updateProfile(obj) {
         if (!storage) return;
-        storage.aced_profile = JSON.stringify($.extend(null, profile, obj));
+        profile = $.extend(null, profile, obj);
+        storage['aced_profile'] = JSON.stringify(profile);
     }
 
     function getEditorStorage() {
         if (!storage) return "";
         try {
-            return JSON.parse(storage['aced_'+id]);
+            return JSON.parse(storage[editorId()]);
         } catch (e) {
             return "";
         }
     }
 
     function updateEditorStorage(content) {
-        storage['aced_'+id] = JSON.stringify(content);
+        storage[editorId()] = JSON.stringify(content);
     }
 
     function initEditorStorage() {
-        if ('aced_'+id in storage) return;
-        storage['aced_'+id] = '';
+        if (editorId() in storage) return;
+        storage[editorId()] = '';
     }
 
     function render(content) {
@@ -150,7 +157,7 @@ function Aced(settings) {
         // For some reason, clear() is not working in Chrome.
         storage.clear();
         options.autoSave = false;
-        delete storage.profile;
+        delete storage.aced_profile;
         // Now reload the page to start fresh
         window.location.reload();
     }
@@ -195,7 +202,7 @@ function Aced(settings) {
     }
 
     function submit() {
-        delete storage['aced_'+id];
+        delete storage[editorId()];
         options.submit(val());
     }
 
@@ -252,6 +259,10 @@ function Aced(settings) {
         preview.scrollTop(scrollFactor * previewScrollRange);
     }
 
+    function setTheme(theme) {
+        editor.setTheme('ace/theme/'+theme);
+        updateProfile({theme: theme});
+    }
 
     function initSyncPreview() {
         if (!preview || !options.syncPreview) return;
@@ -269,6 +280,10 @@ function Aced(settings) {
     function initProps() {
         if (typeof settings == 'string') {
             settings = { editor: settings };
+        }
+
+        if ('theme' in profile) {
+            settings['theme'] = profile['theme'];
         }
 
         $.extend(options, settings);
@@ -294,12 +309,6 @@ function Aced(settings) {
         } else {
             id = element.attr('id')
         }
-
-        storage = hasLocalStorage();
-
-        profile = {
-            theme: 'idle_fingers'
-        };
     }
 
     function initEditor() {
@@ -311,18 +320,22 @@ function Aced(settings) {
         editor.getSession().setUseWrapMode(true);
         editor.setShowPrintMargin(false);
 
-        var $editor = toJquery(id);
-        $editor.prepend('<div class="aced-button-bar aced-button-bar-top">' + buildThemeSelect().html() + '</div>');
-        $editor.prepend('<div class="aced-button-bar aced-button-bar-bottom"><div class="btn btn-primary btn-xs aced-save">Save</div> </div>')
-        $editor.find(".aced-save").click(function(){
-           submit();
-        });
-
         if (options.showButtonBar) {
-            var $bar = $editor.find(".aced-button-bar");
-            $bar.show();
-            $editor.hover(function(){ $bar.show(); }, function() { $bar.hide(); });
+            var $editor = toJquery(id);
+            var $btnBar = $('<div class="aced-button-bar aced-button-bar-top">' + buildThemeSelect().html() + ' <button type="button" class="btn btn-primary btn-xs aced-save">Save</button></div>')
+            $editor.before($btnBar);
+
+            $editor.find(".aced-save").click(function(){
+                submit();
+            });
+
+            if ($.fn.chosen) {
+                $('select', $btnBar).chosen().change(function(){
+                    setTheme($(this).val());
+                });
+            }
         }
+
 
         if (options.keyMaster) {
             bindKeyboard();
@@ -335,8 +348,8 @@ function Aced(settings) {
     }
 
     function init() {
+        initProfile();
         initProps();
-        getProfile();
         initEditor();
         initSyncPreview();
         autoSave();

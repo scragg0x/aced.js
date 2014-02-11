@@ -11,6 +11,8 @@
         "keymaster": "madrobby/keymaster",
         "ace-builds": "~1.1.1",
         "highlightjs": "~7.3.0",
-        "bootstrap": "3.1.0"
+        "bootstrap": "3.1.0",
+        "selectize": "0.8.5",
+        "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.1.0/chosen_v1.1.0.zip"
     }
 }
